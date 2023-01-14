@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Conference;
+use Symfony\Component\HttpFoundation\Request;
 
 class ConferenceController extends AbstractController
 {
@@ -18,10 +19,14 @@ class ConferenceController extends AbstractController
     }
 
     #[Route('/conference/{id}', name: 'conference')]
-    public function show(Conference $conference, CommentRepository $commentRepository)
+    public function show(Request $request, Conference $conference, CommentRepository $commentRepository)
     {
-        $comments = $commentRepository->findBy(['conference' => $conference]);
+        $offset = $request->query->getInt('offset', 0);
+        $comments = $commentRepository->getCommentPaginator($conference, $offset);
+        $prev = $offset - CommentRepository::PAGINATOR_PER_PAGE;
+        $next = min(count($comments), $offset + CommentRepository::PAGINATOR_PER_PAGE);
 
-        return $this->render('conference/show.html.twig', compact('conference', 'comments'));
+
+        return $this->render('conference/show.html.twig', compact('conference', 'comments', 'prev', 'next'));
     }
 }
