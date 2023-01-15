@@ -32,7 +32,7 @@
                                 {% for conference in conferences %}
                                     <li>
                                         <a
-                                            href="{{path('conference', {id: conference.id})}}">
+                                            href="{{path('conference', {slug: conference.slug})}}">
                                             {{ conference }}
                                         </a>
                                     </li>

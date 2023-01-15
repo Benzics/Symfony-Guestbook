@@ -1,37 +1,54 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}
-	Conference Guestbook -
-	{{ conference }}
-{% endblock %}
-{% block body %}
-	<h2>Conference
-		{{ conference }}</h2>
-	{% if comments|length > 0 %}
-		There are
-		{{comments|length}}
-		comments
-		{% for comment in comments %}
+                {% block title %}
+                    Conference Guestbook -
+                    {{ conference }}
+                {% endblock %}
+                {% block body %}
+                    <h2>
+                        Conference
+                        {{ conference }}
+                    </h2>
+                    {% if comments|length > 0 %}
+                        There are
+                        {{comments|length}}
+                        comments
+                        {% for comment in comments %}
 
-			{% if comment.photoFilename %}
-				<img src="{{ asset(comment.photofilename) }}"/>
-			{% endif %}
-			<h4>{{comment.author}}</h4>
-			<small>{{comment.createdAt|format_datetime('medium', 'short')}}</small>
+                            {% if comment.photoFilename %}
+                                <img
+                                    src="{{ asset(comment.photofilename) }}"/>
+                            {% endif %}
+                            <h4>
+                                {{comment.author}}
+                            </h4>
+                            <small>
+                                {{comment.createdAt|format_datetime('medium', 'short')}}
+                            </small>
 
-			<p>{{ comment.text }}</p>
-		{% endfor %}
+                            <p>
+                                {{ comment.text }}
+                            </p>
+                        {% endfor %}
 
-	{% else %}
-		<div>There are no comments yet</div>
-	{% endif %}
+                    {% else %}
+                        <div>
+                            There are no comments yet
+                        </div>
+                    {% endif %}
 
-	{% if prev >= 0 %}
-		<a href="{{path('conference', {id: conference.id, offset: prev})}}">Previous</a>
-	{% endif %}
+                    {% if prev >= 0 %}
+                        <a
+                            href="{{path('conference', {slug: conference.slug, offset: prev})}}">
+                            Previous
+                        </a>
+                    {% endif %}
 
-	{% if next < comments|length %}
-		<a href="{{path('conference', {id: conference.id, offset: next})}}">Next</a>
-	{% endif %}
+                    {% if next < comments|length %}
+                        <a
+                            href="{{path('conference', {slug: conference.slug, offset: next})}}">
+                            Next
+                        </a>
+                    {% endif %}
 
-{% endblock %}
+                {% endblock %}
