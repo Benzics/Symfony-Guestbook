@@ -9,7 +9,7 @@ use Doctrine\ORM\Events;
 
 #[AsEntityListener(event: Events::prePersist, entity: Conference::class)]
 #[AsEntityListener(event: Events::preUpdate, entity: Conference::class)]
-class ConferenEntityListener
+class ConferenceEntityListener
 {
     public function __construct(private SluggerInterface $slugger)
     {

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Comment;
 use App\Repository\ConferenceRepository;
 use App\Repository\CommentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -9,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Conference;
 use Symfony\Component\HttpFoundation\Request;
+use App\Form\CommentFormType;
 
 class ConferenceController extends AbstractController
 {
@@ -26,7 +28,10 @@ class ConferenceController extends AbstractController
         $prev = $offset - CommentRepository::PAGINATOR_PER_PAGE;
         $next = min(count($comments), $offset + CommentRepository::PAGINATOR_PER_PAGE);
 
+        $comment = new Comment();
+        $form = $this->createForm(CommentFormType::class, $comment);
 
-        return $this->render('conference/show.html.twig', compact('conference', 'comments', 'prev', 'next'));
+
+        return $this->render('conference/show.html.twig', compact('conference', 'comments', 'prev', 'next', 'form'));
     }
 }
