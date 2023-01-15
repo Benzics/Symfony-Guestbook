@@ -12,6 +12,8 @@ use App\Entity\Conference;
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\CommentFormType;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class ConferenceController extends AbstractController
 {
@@ -26,7 +28,11 @@ class ConferenceController extends AbstractController
     }
 
     #[Route('/conference/{slug}', name: 'conference')]
-    public function show(Request $request, Conference $conference, CommentRepository $commentRepository)
+    public function show(
+        Request $request,
+        Conference $conference,
+        CommentRepository $commentRepository,
+        #[Autowire('%photo_dir%')] string $photoDir)
     {
         $offset = $request->query->getInt('offset', 0);
         $comments = $commentRepository->getCommentPaginator($conference, $offset);
@@ -41,12 +47,24 @@ class ConferenceController extends AbstractController
         if($form->isSubmitted() && $form->isValid()) {
             $comment->setConference($conference);
 
+            if($photo = $form['photo']->getData()) { 
+                $filename = bin2hex(random_bytes(6)) . '.' . $photo->guessExtension();
+
+                try {
+                    $photo->move($photoDir, $filename);
+                }
+                catch (FileException $e) {
+                    return;
+                }
+
+                $comment->setPhotoFilename($filename);
+            }
             $this->entityManager->persist($comment);
             $this->entityManager->flush();
 
             return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
         }
 
-        return $this->render('conference/show.html.twig', compact('conference', 'comments', 'prev', 'next', 'form'));
+        return $this->render('conference/show.html.twig', compact('conference', 'comments', 'prev', 'next', 'form', ));
     }
 }
