@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[ORM\Entity(repositoryClass: ConferenceRepository::class)]
 #[UniqueEntity('slug')]
@@ -81,6 +82,13 @@ class Conference
         $this->isInternational = $isInternational;
 
         return $this;
+    }
+
+    public function computeSlug(SluggerInterface $sluggerInterface)
+    {
+        if(!$this->slug || $this->slug === '-') {
+            $this->slug = (string) $sluggerInterface->slug((string) $this)->lower();
+        }
     }
 
     /**
