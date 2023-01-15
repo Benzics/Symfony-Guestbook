@@ -11,9 +11,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Conference;
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\CommentFormType;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ConferenceController extends AbstractController
 {
+    public function __construct(private EntityManagerInterface $entityManager)
+    {
+    }
+
     #[Route('/', name: 'homepage')]
     public function index(ConferenceRepository $conferenceRepository): Response
     {
@@ -31,6 +36,16 @@ class ConferenceController extends AbstractController
         $comment = new Comment();
         $form = $this->createForm(CommentFormType::class, $comment);
 
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()) {
+            $comment->setConference($conference);
+
+            $this->entityManager->persist($comment);
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
+        }
 
         return $this->render('conference/show.html.twig', compact('conference', 'comments', 'prev', 'next', 'form'));
     }
