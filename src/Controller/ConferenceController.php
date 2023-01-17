@@ -14,6 +14,7 @@ use App\Form\CommentFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use App\Services\SpamChecker;
 
 class ConferenceController extends AbstractController
 {
@@ -32,6 +33,7 @@ class ConferenceController extends AbstractController
         Request $request,
         Conference $conference,
         CommentRepository $commentRepository,
+        SpamChecker $spamChecker,
         #[Autowire('%photo_dir%')] string $photoDir)
     {
         $offset = $request->query->getInt('offset', 0);
@@ -59,7 +61,22 @@ class ConferenceController extends AbstractController
 
                 $comment->setPhotoFilename($filename);
             }
+
+           
+
             $this->entityManager->persist($comment);
+
+            $context = [
+                'user_ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('user-agent'),
+                'referrer' => $request->headers->get('referrer'),
+                'permalink' => $request->getUri()
+            ];
+
+            if($spamChecker->getSpamScore($comment, $context) === 2) {
+                throw new \RuntimeException('Blantant spam!!');
+            }
+            
             $this->entityManager->flush();
 
             return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
